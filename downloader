@@ -44,12 +44,11 @@ def main():
 		    filePath = os.path.join(".", M.server, M.user, fileName)
                     ensure_dir(filePath)
 		    if not os.path.isfile(filePath) :
-			print fileName
-			fp = open(filePath, 'wb')
                         segment = part.get_payload(decode=True)
                         if segment:
+                            fp = open(filePath, 'wb')
 			    fp.write(segment)
-			fp.close()
+			    fp.close()
 
 if __name__ == '__main__':
     main()
