@@ -9,46 +9,47 @@ import ayemappy
 import getpass
 
 def ensure_dir(file_path):
+    """Given a file path, ensure that the relevant paths exist"""
     directory = os.path.dirname(file_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
 def main():
+    """Main function"""
 
     imapserver = raw_input('Enter the server name:')
-    userName = raw_input('Enter your username:')
+    username = raw_input('Enter your username:')
     passwd = getpass.getpass('Enter your password: ')
 
-    M = ayemappy.Ayemappy()
-    M.connect(imapserver, userName, passwd)
-    for folder in M.listfolders():
-	print 'Processing %s' % folder
+    server = ayemappy.Ayemappy()
+    server.connect(imapserver, username, passwd)
+    for folder in server.listfolders():
+        print 'Processing %s' % folder
 
-	# Iterating over all emails
-        for msgId in tqdm(M.listmessages(folder)):
-	    typ, messageParts = M.session.fetch(msgId, '(RFC822)')
-	    if typ != 'OK':
-		print 'Error fetching mail.'
-		raise
+    # Iterating over all emails
+        for msgId in tqdm(server.listmessages(folder)):
+            typ, messageParts = server.session.fetch(msgId, '(RFC822)')
+            if typ != 'OK':
+                print 'Error fetching mail.'
 
-	    emailBody = messageParts[0][1]
-	    mail = email.message_from_string(emailBody)
-	    for part in mail.walk():
-		if part.get_content_maintype() == 'multipart':
-		    continue
-		if part.get('Content-Disposition') is None:
-		    continue
-		fileName = part.get_filename()
+        emailBody = messageParts[0][1]
+        mail = email.message_from_string(emailBody)
+        for part in mail.walk():
+            if part.get_content_maintype() == 'multipart':
+                continue
+        if part.get('Content-Disposition') is None:
+            continue
+        fileName = part.get_filename()
 
-		if bool(fileName):
-		    filePath = os.path.join(".", M.server, M.user, fileName)
-                    ensure_dir(filePath)
-		    if not os.path.isfile(filePath) :
-                        segment = part.get_payload(decode=True)
-                        if segment:
-                            fp = open(filePath, 'wb')
-			    fp.write(segment)
-			    fp.close()
+        if bool(fileName):
+            filePath = os.path.join(".", server.server, server.user, fileName)
+            ensure_dir(filePath)
+            if not os.path.isfile(filePath):
+                segment = part.get_payload(decode=True)
+                if segment:
+                    fp = open(filePath, 'wb')
+                    fp.write(segment)
+                    fp.close()
 
 if __name__ == '__main__':
     main()
