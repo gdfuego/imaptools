@@ -44,10 +44,11 @@ class ayemap:
 
     def listmessages(self, folder):
         self.Session.select(folder, 'readonly')
-        typ, data = imapSession.search(None, 'ALL')
+        typ, data = self.Session.search(None, 'ALL')
         if typ != 'OK':
             print 'Error searching Inbox.'
             raise
+        return data[0].split()
 
     def disconnect(self):
         self.Session.close()
@@ -62,16 +63,17 @@ def main():
     if 'downloads' not in os.listdir(detach_dir):
 	os.mkdir('downloads')
 
-    userName = raw_input('Enter your AOL username:')
+    imapserver = raw_input('Enter the server name:')
+    userName = raw_input('Enter your username:')
     passwd = getpass.getpass('Enter your password: ')
 
-
-    for folder in folders:
+    M = ayemap(imapserver, userName, passwd)
+    for folder in M.listfolders():
 	print 'Processing %s' % folder
 
 	# Iterating over all emails
-	for msgId in tqdm(data[0].split()):
-	    typ, messageParts = imapSession.fetch(msgId, '(RFC822)')
+        for msgId in tqdm(M.listmessages(folder)):
+	    typ, messageParts = M.Session.fetch(msgId, '(RFC822)')
 	    if typ != 'OK':
 		print 'Error fetching mail.'
 		raise
@@ -80,10 +82,8 @@ def main():
 	    mail = email.message_from_string(emailBody)
 	    for part in mail.walk():
 		if part.get_content_maintype() == 'multipart':
-		    # print part.as_string()
 		    continue
 		if part.get('Content-Disposition') is None:
-		    # print part.as_string()
 		    continue
 		fileName = part.get_filename()
 
