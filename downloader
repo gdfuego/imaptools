@@ -40,7 +40,7 @@ def main():
 		fileName = part.get_filename()
 
 		if bool(fileName):
-		    filePath = os.path.join(".", 'downloads', M.server, M.user, fileName)
+		    filePath = os.path.join(".", M.server, M.user, fileName)
                     ensure_dir(filePath)
 		    if not os.path.isfile(filePath) :
 			print fileName
