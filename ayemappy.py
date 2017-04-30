@@ -14,7 +14,7 @@ def parse_list_response(line):
     mailbox_name = mailbox_name.strip('"')
     return (flags, delimiter, mailbox_name)
 
-class ayemap:
+class ayemappy:
     """Simplified wrapper on imap"""
 
     def __init__(self, server, user, password):
@@ -54,20 +54,19 @@ class ayemap:
         self.Session.close()
         self.Session.logout()
 
-
+def ensure_dir(file_path):
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 def main():
     import getpass
-
-    detach_dir = '.'
-    if 'downloads' not in os.listdir(detach_dir):
-	os.mkdir('downloads')
 
     imapserver = raw_input('Enter the server name:')
     userName = raw_input('Enter your username:')
     passwd = getpass.getpass('Enter your password: ')
 
-    M = ayemap(imapserver, userName, passwd)
+    M = ayemappy(imapserver, userName, passwd)
     for folder in M.listfolders():
 	print 'Processing %s' % folder
 
@@ -88,11 +87,14 @@ def main():
 		fileName = part.get_filename()
 
 		if bool(fileName):
-		    filePath = os.path.join(detach_dir, 'downloads', fileName)
+		    filePath = os.path.join(".", 'downloads', M.server, M.user, fileName)
+                    ensure_dir(filePath)
 		    if not os.path.isfile(filePath) :
 			print fileName
 			fp = open(filePath, 'wb')
-			fp.write(part.get_payload(decode=True))
+                        segment = part.get_payload(decode=True)
+                        if segment:
+			    fp.write(segment)
 			fp.close()
 
 if __name__ == '__main__':
