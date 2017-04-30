@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-import email
 import re
-import os
-import sys
-from tqdm import tqdm
 import imaplib
 
 list_response_pattern = re.compile(r'\((?P<flags>.*?)\) "(?P<delimiter>.*)" (?P<name>.*)')
@@ -14,7 +10,7 @@ def parse_list_response(line):
     mailbox_name = mailbox_name.strip('"')
     return (flags, delimiter, mailbox_name)
 
-class ayemappy:
+class Ayemappy:
     """Simplified wrapper on imap"""
 
     def __init__(self, server, user, password):
@@ -23,7 +19,7 @@ class ayemappy:
         self.password = password
         self.Session = None
         self.folders = []
-	self.connect()
+        self.connect()
 
     def connect(self):
         self.Session = imaplib.IMAP4_SSL(self.server)
@@ -34,13 +30,13 @@ class ayemappy:
 
     def listfolders(self):
         self.folders = []
-	typ, folders = self.Session.list()
-	if typ != 'OK':
-	    print 'Not able to get a list of folders'
-	    raise
-	for folder in folders:
-	    self.folders.append(parse_list_response(folder)[2])
-	return self.folders
+        typ, folders = self.Session.list()
+        if typ != 'OK':
+            print 'Not able to get a list of folders'
+            raise
+        for folder in folders:
+            self.folders.append(parse_list_response(folder)[2])
+        return self.folders
 
     def listmessages(self, folder):
         self.Session.select(folder, 'readonly')

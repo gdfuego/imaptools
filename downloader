@@ -19,7 +19,7 @@ def main():
     userName = raw_input('Enter your username:')
     passwd = getpass.getpass('Enter your password: ')
 
-    M = ayemappy.ayemappy(imapserver, userName, passwd)
+    M = ayemappy.Ayemappy(imapserver, userName, passwd)
     for folder in M.listfolders():
 	print 'Processing %s' % folder
 
