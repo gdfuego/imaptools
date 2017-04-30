@@ -19,13 +19,14 @@ def main():
     userName = raw_input('Enter your username:')
     passwd = getpass.getpass('Enter your password: ')
 
-    M = ayemappy.Ayemappy(imapserver, userName, passwd)
+    M = ayemappy.Ayemappy()
+    M.connect(imapserver, userName, passwd)
     for folder in M.listfolders():
 	print 'Processing %s' % folder
 
 	# Iterating over all emails
         for msgId in tqdm(M.listmessages(folder)):
-	    typ, messageParts = M.Session.fetch(msgId, '(RFC822)')
+	    typ, messageParts = M.session.fetch(msgId, '(RFC822)')
 	    if typ != 'OK':
 		print 'Error fetching mail.'
 		raise

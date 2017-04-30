@@ -1,57 +1,56 @@
 #!/usr/bin/env python
 
+"""Simplified IMAP function for my needs"""
+
 import re
 import imaplib
 
-list_response_pattern = re.compile(r'\((?P<flags>.*?)\) "(?P<delimiter>.*)" (?P<name>.*)')
+LISTPARSE = re.compile(r'\((?P<flags>.*?)\) "(?P<delimiter>.*)" (?P<name>.*)')
 
 def parse_list_response(line):
-    flags, delimiter, mailbox_name = list_response_pattern.match(line).groups()
+    """Process the output of an IMAP list command"""
+    flags, delimiter, mailbox_name = LISTPARSE.match(line).groups()
     mailbox_name = mailbox_name.strip('"')
     return (flags, delimiter, mailbox_name)
 
-class Ayemappy:
+class Ayemappy(object):
     """Simplified wrapper on imap"""
 
-    def __init__(self, server, user, password):
+    def __init__(self):
+        """Setup connection"""
+        self.session = None
+        self.server = None
+        self.user = None
+        self.folders = []
+
+    def connect(self, server, user, password):
+        """Connect to the specified server with the supplied username and password"""
         self.server = server
         self.user = user
-        self.password = password
-        self.Session = None
-        self.folders = []
-        self.connect()
-
-    def connect(self):
-        self.Session = imaplib.IMAP4_SSL(self.server)
-        typ, accountDetails = self.Session.login(self.user, self.password)
+        self.session = imaplib.IMAP4_SSL(self.server)
+        typ, accountdetails = self.session.login(self.user, password)
         if typ != 'OK':
             print 'Not able to sign in!'
-            raise
 
     def listfolders(self):
+        """Obtain a list of folders"""
         self.folders = []
-        typ, folders = self.Session.list()
+        typ, folders = self.session.list()
         if typ != 'OK':
             print 'Not able to get a list of folders'
-            raise
         for folder in folders:
             self.folders.append(parse_list_response(folder)[2])
         return self.folders
 
     def listmessages(self, folder):
-        self.Session.select(folder, 'readonly')
-        typ, data = self.Session.search(None, 'ALL')
+        """Get a list of message IDs for a given folder"""
+        self.session.select(folder, 'readonly')
+        typ, data = self.session.search(None, 'ALL')
         if typ != 'OK':
             print 'Error searching Inbox.'
-            raise
         return data[0].split()
 
     def disconnect(self):
-        self.Session.close()
-        self.Session.logout()
-
-def main():
-    pass
-
-if __name__ == '__main__':
-    main()
+        """Disconnect from the IMAP server"""
+        self.session.close()
+        self.session.logout()
