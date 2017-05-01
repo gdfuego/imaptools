@@ -26,7 +26,7 @@ def main():
         print 'Processing %s' % folder
 
         # Iterating over all emails
-        for msgid in tqdm(server.listmessages(folder)):
+        for msgid in tqdm(server.listmessages(folder), unit="messages"):
             typ, messageparts = server.session.fetch(msgid, '(RFC822)')
             if typ != 'OK':
                 print 'Error fetching mail.'
