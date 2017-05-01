@@ -12,16 +12,27 @@ def ensure_dir(file_path):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+def setup():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--imapserver', '-i', help="IMAP server to connect to")
+    parser.add_argument('--username', '-u', help="Username to connect as")
+    args = parser.parse_args()
+    return args
+
 def main():
     """Main function"""
+    args = setup()
+    if not args.imapserver:
+        args.imapserver = raw_input('Enter the server name:')
+    if not args.username:
+        args.username = raw_input('Enter your username:')
+    args.passwd = getpass.getpass('Enter your password: ')
 
-    imapserver = raw_input('Enter the server name:')
-    username = raw_input('Enter your username:')
-    passwd = getpass.getpass('Enter your password: ')
     part = None
 
     server = ayemappy.Ayemappy()
-    server.connect(imapserver, username, passwd)
+    server.connect(args.imapserver, args.username, args.passwd)
     for folder in server.listfolders():
         print 'Processing %s' % folder
 
